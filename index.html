@@ -156,6 +156,14 @@
             box-shadow: 0 4px 12px rgba(5, 150, 105, 0.4);
         }
 
+        .reset-btn {
+            background: linear-gradient(135deg, #6b7280 0%, #4b5563 100%);
+        }
+
+        .reset-btn:hover {
+            box-shadow: 0 4px 12px rgba(107, 114, 128, 0.4);
+        }
+
         .pl-container {
             background: white;
             border-radius: 8px;
@@ -367,6 +375,7 @@
                 </div>
             </div>
 
+            <button class="execute-btn reset-btn" onclick="resetToDefault()">🔄 実績平均へリセット</button>
             <button class="execute-btn" onclick="calculatePL()">⚡ 計算実行</button>
             <button class="execute-btn export-btn" onclick="exportCSV()">📥 CSV出力</button>
         </div>
@@ -534,7 +543,7 @@
                     { name: '田中奈智', role: 'M', performance: 1388690 },
                     { name: '田中莉央', role: 'MD', performance: 476234 },
                     { name: '足立裕美', role: 'C', performance: 559634 },
-                    { name: '長島向沙', role: 'SC', performance: 787216 }
+                    { name: '長島吏沙', role: 'SC', performance: 787216 }
                 ]
             },
             sanaruda: { 
@@ -558,7 +567,7 @@
                 staffList: [
                     { name: '太田香', role: 'MD', performance: 393755 },
                     { name: '村木咲良', role: 'SM', performance: 1135208 },
-                    { name: '中井星瑠佳', role: 'C', performance: 649474 }
+                    { name: '中井星璃佳', role: 'C', performance: 649474 }
                 ]
             },
             hiroshima: { 
@@ -582,8 +591,8 @@
                 staffList: [
                     { name: '浅野智美', role: 'MD', performance: 375707 },
                     { name: '大矢美由紀', role: 'MD', performance: 1271088 },
-                    { name: '土井長観美', role: 'SC', performance: 499582 },
-                    { name: '河内浩美', role: 'A', performance: 422801 }
+                    { name: '土井長芳美', role: 'SC', performance: 499582 },
+                    { name: '河内恵美', role: 'A', performance: 422801 }
                 ]
             }
         };
@@ -645,6 +654,33 @@
             else return 0;
             
             return Math.floor(totalBonus / staffCount);
+        }
+
+        function resetToDefault() {
+            // 全店共通増額をクリア
+            document.getElementById('commonIncrease').value = '';
+            
+            // 各店舗の個別増額をクリア
+            document.getElementById('shimizu').value = '';
+            document.getElementById('shizuoka').value = '';
+            document.getElementById('kakegawa').value = '';
+            document.getElementById('ichino').value = '';
+            document.getElementById('sanaruda').value = '';
+            document.getElementById('hiroshima').value = '';
+            
+            // デフォルト値（増額0）で再計算
+            updateDisplay();
+            
+            // フィードバック表示
+            const btn = event.target;
+            const originalText = btn.textContent;
+            btn.textContent = '✓ リセット完了';
+            btn.style.background = 'linear-gradient(135deg, #059669 0%, #047857 100%)';
+            
+            setTimeout(() => {
+                btn.textContent = originalText;
+                btn.style.background = 'linear-gradient(135deg, #6b7280 0%, #4b5563 100%)';
+            }, 1500);
         }
 
         function calculateStorePL(storeId, additionalSales) {
