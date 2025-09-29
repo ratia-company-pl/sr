@@ -1,0 +1,967 @@
+<!DOCTYPE html>
+<html lang="ja">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>エステ店舗PLシミュレーター - メインダッシュボード</title>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: 'Segoe UI', Meiryo, sans-serif;
+            background: linear-gradient(135deg, #6b7280 0%, #4b5563 100%);
+            min-height: 100vh;
+            padding: 16px;
+        }
+
+        .container {
+            max-width: 1800px;
+            margin: 0 auto;
+        }
+
+        .header {
+            background: white;
+            padding: 16px;
+            border-radius: 8px;
+            margin-bottom: 12px;
+            box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+        }
+
+        h1 {
+            color: #374151;
+            font-size: 20px;
+            margin-bottom: 12px;
+        }
+
+        .nav-buttons {
+            display: grid;
+            grid-template-columns: repeat(4, 1fr);
+            gap: 8px;
+        }
+
+        .nav-btn {
+            padding: 10px 8px;
+            border: none;
+            border-radius: 6px;
+            font-size: 11px;
+            font-weight: 600;
+            cursor: pointer;
+            transition: all 0.2s;
+            color: white;
+            line-height: 1.3;
+        }
+
+        .nav-btn.blue { background: linear-gradient(135deg, #3b82f6 0%, #2563eb 100%); }
+        .nav-btn.purple { background: linear-gradient(135deg, #8b5cf6 0%, #7c3aed 100%); }
+        .nav-btn.teal { background: linear-gradient(135deg, #14b8a6 0%, #0d9488 100%); }
+        .nav-btn.green { background: linear-gradient(135deg, #059669 0%, #047857 100%); }
+
+        .nav-btn:hover {
+            transform: translateY(-1px);
+            box-shadow: 0 2px 8px rgba(0, 0, 0, 0.2);
+        }
+
+        .input-section {
+            background: #f9fafb;
+            padding: 12px;
+            border-radius: 6px;
+            margin-bottom: 12px;
+            border: 2px solid #e5e7eb;
+        }
+
+        .common-input {
+            display: flex;
+            align-items: center;
+            gap: 10px;
+            margin-bottom: 10px;
+        }
+
+        .common-input label {
+            font-size: 13px;
+            font-weight: 700;
+            color: #374151;
+            white-space: nowrap;
+        }
+
+        .common-input input {
+            padding: 6px 10px;
+            border: 2px solid #d1d5db;
+            border-radius: 4px;
+            font-size: 13px;
+            width: 120px;
+            font-family: 'Courier New', monospace;
+        }
+
+        .store-inputs {
+            display: grid;
+            grid-template-columns: repeat(6, 1fr);
+            gap: 8px;
+            margin-bottom: 10px;
+        }
+
+        .store-input-box {
+            background: white;
+            padding: 6px;
+            border-radius: 4px;
+            border: 2px solid #e5e7eb;
+            text-align: center;
+        }
+
+        .store-input-box label {
+            display: block;
+            font-size: 11px;
+            font-weight: 700;
+            color: #374151;
+            margin-bottom: 4px;
+        }
+
+        .store-input-box input {
+            width: 100%;
+            padding: 4px;
+            border: 1px solid #d1d5db;
+            border-radius: 3px;
+            font-size: 12px;
+            font-family: 'Courier New', monospace;
+            text-align: center;
+        }
+
+        .execute-btn {
+            width: 100%;
+            padding: 10px;
+            background: linear-gradient(135deg, #f97316 0%, #ea580c 100%);
+            color: white;
+            border: none;
+            border-radius: 6px;
+            font-size: 14px;
+            font-weight: 700;
+            cursor: pointer;
+            transition: all 0.2s;
+            margin-bottom: 8px;
+        }
+
+        .execute-btn:hover {
+            transform: translateY(-1px);
+            box-shadow: 0 4px 12px rgba(249, 115, 22, 0.4);
+        }
+
+        .export-btn {
+            background: linear-gradient(135deg, #059669 0%, #047857 100%);
+        }
+
+        .export-btn:hover {
+            box-shadow: 0 4px 12px rgba(5, 150, 105, 0.4);
+        }
+
+        .pl-container {
+            background: white;
+            border-radius: 8px;
+            box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+            overflow-x: auto;
+        }
+
+        .pl-grid {
+            display: grid;
+            grid-template-columns: 120px 1fr repeat(6, 1fr);
+            min-width: 1400px;
+        }
+
+        .store-total { background: linear-gradient(135deg, #1f2937 0%, #111827 100%); }
+        .store-shimizu { background: linear-gradient(135deg, #3b82f6 0%, #2563eb 100%); }
+        .store-shizuoka { background: linear-gradient(135deg, #8b5cf6 0%, #7c3aed 100%); }
+        .store-ichino { background: linear-gradient(135deg, #14b8a6 0%, #0d9488 100%); }
+        .store-sanaruda { background: linear-gradient(135deg, #059669 0%, #047857 100%); }
+        .store-kakegawa { background: linear-gradient(135deg, #f59e0b 0%, #d97706 100%); }
+        .store-hiroshima { background: linear-gradient(135deg, #ec4899 0%, #db2777 100%); }
+
+        .pl-header {
+            color: white;
+            padding: 8px;
+            text-align: center;
+            font-weight: 700;
+            font-size: 12px;
+            border-bottom: 2px solid rgba(255,255,255,0.3);
+        }
+
+        .pl-label {
+            background: #f3f4f6;
+            padding: 8px;
+            font-size: 11px;
+            font-weight: 600;
+            color: #374151;
+            border-right: 1px solid #e5e7eb;
+            border-bottom: 1px solid #e5e7eb;
+            display: flex;
+            align-items: center;
+        }
+
+        .total-kpi {
+            padding: 12px 8px;
+            background: #f9fafb;
+            border-right: 1px solid #e5e7eb;
+            border-bottom: 1px solid #e5e7eb;
+            display: flex;
+            flex-direction: column;
+            justify-content: center;
+            gap: 8px;
+        }
+
+        .kpi-item {
+            text-align: center;
+        }
+
+        .kpi-label {
+            font-size: 10px;
+            color: #6b7280;
+            font-weight: 600;
+            margin-bottom: 4px;
+        }
+
+        .kpi-value {
+            font-size: 18px;
+            font-weight: 800;
+            font-family: 'Courier New', monospace;
+            color: #1f2937;
+        }
+
+        .kpi-value.profit-positive {
+            color: #059669;
+        }
+
+        .kpi-value.profit-negative {
+            color: #dc2626;
+        }
+
+        .store-info {
+            padding: 8px 6px;
+            font-size: 10px;
+            line-height: 1.4;
+            border-right: 1px solid #e5e7eb;
+            border-bottom: 1px solid #e5e7eb;
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 4px 8px;
+        }
+
+        .store-info.shimizu { background: #eff6ff; }
+        .store-info.shizuoka { background: #f5f3ff; }
+        .store-info.ichino { background: #f0fdfa; }
+        .store-info.sanaruda { background: #f0fdf4; }
+        .store-info.kakegawa { background: #fffbeb; }
+        .store-info.hiroshima { background: #fdf2f8; }
+
+        .info-line {
+            display: flex;
+            flex-direction: column;
+        }
+
+        .info-label {
+            color: #6b7280;
+            font-weight: 600;
+            font-size: 9px;
+            margin-bottom: 2px;
+        }
+
+        .info-value {
+            color: #1f2937;
+            font-weight: 700;
+            font-family: 'Courier New', monospace;
+        }
+
+        .info-line.highlight .info-value {
+            color: #2563eb;
+            font-size: 12px;
+            font-weight: 800;
+        }
+
+        .info-line.highlight-red .info-value {
+            color: #dc2626;
+            font-size: 12px;
+            font-weight: 800;
+        }
+
+        .result-cell {
+            padding: 6px;
+            text-align: center;
+            font-family: 'Courier New', monospace;
+            font-size: 12px;
+            font-weight: 700;
+            border-right: 1px solid #e5e7eb;
+            border-bottom: 1px solid #e5e7eb;
+        }
+
+        .section-divider {
+            background: #e5e7eb;
+            padding: 4px 8px;
+            font-size: 10px;
+            font-weight: 700;
+            color: #4b5563;
+            border-bottom: 1px solid #d1d5db;
+            grid-column: 1 / -1;
+        }
+
+        .highlight-profit {
+            background: #d1fae5 !important;
+            color: #065f46;
+        }
+
+        .highlight-total {
+            background: #fef3c7 !important;
+            color: #92400e;
+        }
+
+        @media (max-width: 1400px) {
+            .pl-grid {
+                min-width: 1000px;
+            }
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <div class="header">
+            <h1>📊 エステ店舗PLシミュレーター</h1>
+            
+            <div class="nav-buttons">
+                <button class="nav-btn blue" onclick="alert('単独PL通常ページへ')">単独PL通常</button>
+                <button class="nav-btn purple" onclick="alert('単独PL逆算ページへ')">単独PL逆算</button>
+                <button class="nav-btn teal" onclick="alert('2店舗合算通常ページへ')">2店舗合算通常</button>
+                <button class="nav-btn green" onclick="alert('2店舗合算逆算ページへ')">2店舗合算逆算</button>
+            </div>
+        </div>
+
+        <div class="input-section">
+            <div class="common-input">
+                <label>📄 全店共通増額:</label>
+                <input type="number" id="commonIncrease" placeholder="0" min="0" step="1">
+                <span style="font-size: 11px; color: #6b7280;">万円</span>
+            </div>
+
+            <div class="store-inputs">
+                <div class="store-input-box">
+                    <label>清水店</label>
+                    <input type="number" id="shimizu" placeholder="0">
+                </div>
+                <div class="store-input-box">
+                    <label>静岡店</label>
+                    <input type="number" id="shizuoka" placeholder="0">
+                </div>
+                <div class="store-input-box">
+                    <label>掛川店</label>
+                    <input type="number" id="kakegawa" placeholder="0">
+                </div>
+                <div class="store-input-box">
+                    <label>市野店</label>
+                    <input type="number" id="ichino" placeholder="0">
+                </div>
+                <div class="store-input-box">
+                    <label>佐鳴台店</label>
+                    <input type="number" id="sanaruda" placeholder="0">
+                </div>
+                <div class="store-input-box">
+                    <label>広島店</label>
+                    <input type="number" id="hiroshima" placeholder="0">
+                </div>
+            </div>
+
+            <button class="execute-btn" onclick="calculatePL()">⚡ 計算実行</button>
+            <button class="execute-btn export-btn" onclick="exportCSV()">📥 CSV出力</button>
+        </div>
+
+        <div class="pl-container">
+            <div class="pl-grid" id="plGrid">
+                <!-- ヘッダー行 -->
+                <div class="pl-label" style="background: #6b7280; color: white; border-bottom: 2px solid #4b5563;">項目</div>
+                <div class="pl-header store-total">全体合計</div>
+                <div class="pl-header store-shimizu">清水店</div>
+                <div class="pl-header store-shizuoka">静岡店</div>
+                <div class="pl-header store-kakegawa">掛川店</div>
+                <div class="pl-header store-ichino">市野店</div>
+                <div class="pl-header store-sanaruda">佐鳴台店</div>
+                <div class="pl-header store-hiroshima">広島店</div>
+
+                <!-- 店舗基本情報 -->
+                <div class="pl-label">店舗情報</div>
+                <div class="total-kpi">
+                    <div class="kpi-item">
+                        <div class="kpi-label">合計売上</div>
+                        <div class="kpi-value" id="total-sales">-</div>
+                    </div>
+                    <div class="kpi-item">
+                        <div class="kpi-label">合計営業利益</div>
+                        <div class="kpi-value" id="total-profit">-</div>
+                    </div>
+                </div>
+                <div class="store-info shimizu">
+                    <div class="info-line highlight"><span class="info-label">責任額</span><span class="info-value">630万</span></div>
+                    <div class="info-line highlight"><span class="info-label">定期</span><span class="info-value">121.9万</span></div>
+                    <div class="info-line highlight-red"><span class="info-label">実績</span><span class="info-value">257.3万</span></div>
+                    <div class="info-line"><span class="info-label">人数</span><span class="info-value">4名</span></div>
+                </div>
+                <div class="store-info shizuoka">
+                    <div class="info-line highlight"><span class="info-label">責任額</span><span class="info-value">440万</span></div>
+                    <div class="info-line highlight"><span class="info-label">定期</span><span class="info-value">174.1万</span></div>
+                    <div class="info-line highlight-red"><span class="info-label">実績</span><span class="info-value">157.2万</span></div>
+                    <div class="info-line"><span class="info-label">人数</span><span class="info-value">2名</span></div>
+                </div>
+                <div class="store-info kakegawa">
+                    <div class="info-line highlight"><span class="info-label">責任額</span><span class="info-value">725万</span></div>
+                    <div class="info-line highlight"><span class="info-label">定期</span><span class="info-value">90.0万</span></div>
+                    <div class="info-line highlight-red"><span class="info-label">実績</span><span class="info-value">381.0万</span></div>
+                    <div class="info-line"><span class="info-label">人数</span><span class="info-value">5名</span></div>
+                </div>
+                <div class="store-info ichino">
+                    <div class="info-line highlight"><span class="info-label">責任額</span><span class="info-value">730万</span></div>
+                    <div class="info-line highlight"><span class="info-label">定期</span><span class="info-value">68.5万</span></div>
+                    <div class="info-line highlight-red"><span class="info-label">実績</span><span class="info-value">663.5万</span></div>
+                    <div class="info-line"><span class="info-label">人数</span><span class="info-value">5名</span></div>
+                </div>
+                <div class="store-info sanaruda">
+                    <div class="info-line highlight"><span class="info-label">責任額</span><span class="info-value">523万</span></div>
+                    <div class="info-line highlight"><span class="info-label">定期</span><span class="info-value">106.9万</span></div>
+                    <div class="info-line highlight-red"><span class="info-label">実績</span><span class="info-value">217.8万</span></div>
+                    <div class="info-line"><span class="info-label">人数</span><span class="info-value">3名</span></div>
+                </div>
+                <div class="store-info hiroshima">
+                    <div class="info-line highlight"><span class="info-label">責任額</span><span class="info-value">608万</span></div>
+                    <div class="info-line highlight"><span class="info-label">定期</span><span class="info-value">160.0万</span></div>
+                    <div class="info-line highlight-red"><span class="info-label">実績</span><span class="info-value">256.9万</span></div>
+                    <div class="info-line"><span class="info-label">人数</span><span class="info-value">4名</span></div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        const storeData = {
+            shimizu: { 
+                name: '清水店', 
+                responsibility: 6300000, 
+                subscription: 1219000, 
+                performance: 2573000, 
+                staff: 4,
+                fixedCosts: {
+                    zatsukyuu: 110000,
+                    pmReward: 40000,
+                    eisei: 20000,
+                    chidai: 330000,
+                    ryohi: 40000,
+                    tsushin: 20000,
+                    shoumou: 20000,
+                    jimu: 10000,
+                    suido: 60000,
+                    kanri: 30000
+                },
+                staffList: [
+                    { name: '佐藤愛', role: 'MD', performance: 452229 },
+                    { name: '植田凪咲', role: 'SM', performance: 1192714 },
+                    { name: '古木彩香', role: 'C', performance: 672560 },
+                    { name: '山口純加', role: 'A', performance: 255627 }
+                ]
+            },
+            shizuoka: { 
+                name: '静岡店', 
+                responsibility: 4400000, 
+                subscription: 1741000, 
+                performance: 1572000, 
+                staff: 2,
+                fixedCosts: {
+                    zatsukyuu: 40000,
+                    pmReward: 30000,
+                    eisei: 20000,
+                    chidai: 290000,
+                    ryohi: 30000,
+                    tsushin: 20000,
+                    shoumou: 20000,
+                    jimu: 10000,
+                    suido: 70000,
+                    kanri: 30000
+                },
+                staffList: [
+                    { name: '早川仁美', role: 'MD', performance: 986105 },
+                    { name: '湯尾あかり', role: 'MD', performance: 585977 }
+                ]
+            },
+            kakegawa: { 
+                name: '掛川店', 
+                responsibility: 7250000, 
+                subscription: 900000, 
+                performance: 3810213, 
+                staff: 5,
+                fixedCosts: {
+                    zatsukyuu: 161464,
+                    pmReward: 27780,
+                    eisei: 32326,
+                    chidai: 361111,
+                    ryohi: 60462,
+                    tsushin: 14584,
+                    shoumou: 22733,
+                    jimu: 18630,
+                    suido: 122980,
+                    kanri: 30000
+                },
+                staffList: [
+                    { name: '海野由佳', role: 'MD', performance: 1006301 },
+                    { name: '西村芽久美', role: 'SM', performance: 729770 },
+                    { name: '良知美咲', role: 'SM', performance: 190842 },
+                    { name: '守屋繭', role: 'C', performance: 991423 },
+                    { name: '海野安美', role: 'C', performance: 891877 }
+                ]
+            },
+            ichino: { 
+                name: '市野店', 
+                responsibility: 7300000, 
+                subscription: 685000, 
+                performance: 6635000, 
+                staff: 5,
+                fixedCosts: {
+                    zatsukyuu: 10000,
+                    pmReward: 0,
+                    eisei: 30000,
+                    chidai: 200000,
+                    ryohi: 40000,
+                    tsushin: 30000,
+                    shoumou: 20000,
+                    jimu: 10000,
+                    suido: 70000,
+                    kanri: 30000
+                },
+                staffList: [
+                    { name: '大橋亜季', role: 'EM', performance: 3423440 },
+                    { name: '田中奈智', role: 'M', performance: 1388690 },
+                    { name: '田中莉央', role: 'MD', performance: 476234 },
+                    { name: '足立裕美', role: 'C', performance: 559634 },
+                    { name: '長島向沙', role: 'SC', performance: 787216 }
+                ]
+            },
+            sanaruda: { 
+                name: '佐鳴台店', 
+                responsibility: 5230000, 
+                subscription: 1069000, 
+                performance: 2178000, 
+                staff: 3,
+                fixedCosts: {
+                    zatsukyuu: 50000,
+                    pmReward: 30000,
+                    eisei: 10000,
+                    chidai: 220000,
+                    ryohi: 40000,
+                    tsushin: 20000,
+                    shoumou: 20000,
+                    jimu: 10000,
+                    suido: 50000,
+                    kanri: 30000
+                },
+                staffList: [
+                    { name: '太田香', role: 'MD', performance: 393755 },
+                    { name: '村木咲良', role: 'SM', performance: 1135208 },
+                    { name: '中井星瑠佳', role: 'C', performance: 649474 }
+                ]
+            },
+            hiroshima: { 
+                name: '広島店', 
+                responsibility: 6080000, 
+                subscription: 1600000, 
+                performance: 2569178, 
+                staff: 4,
+                fixedCosts: {
+                    zatsukyuu: 46391,
+                    pmReward: 36594,
+                    eisei: 14103,
+                    chidai: 460000,
+                    ryohi: 85297,
+                    tsushin: 26009,
+                    shoumou: 22733,
+                    jimu: 18630,
+                    suido: 58138,
+                    kanri: 30000
+                },
+                staffList: [
+                    { name: '浅野智美', role: 'MD', performance: 375707 },
+                    { name: '大矢美由紀', role: 'MD', performance: 1271088 },
+                    { name: '土井長観美', role: 'SC', performance: 499582 },
+                    { name: '河内浩美', role: 'A', performance: 422801 }
+                ]
+            }
+        };
+
+        const commonFixedCosts = {
+            butsuryuu: 350000,
+            gaichu: 210000,
+            nikuzukuri: 120000,
+            koukoku: 50000,
+            hanbai: 70000,
+            lease: 10000,
+            hoken: 10000,
+            houshuu: 60000,
+            genka: 40000
+        };
+
+        const baseSalary = {
+            MD: 350000,
+            EM: 300000,
+            M: 230000,
+            SM: 230000,
+            C: 230000,
+            SC: 230000,
+            A: 230000,
+            SA: 230000
+        };
+
+        const roleSalary = {
+            MD: 0,
+            EM: 0,
+            M: 50000,
+            SM: 40000,
+            C: 30000,
+            SC: 20000,
+            A: 10000,
+            SA: 0
+        };
+
+        function getMDSalary(achievementRate) {
+            if (achievementRate >= 100.0) return 350000;
+            if (achievementRate >= 97.2) return 320000;
+            if (achievementRate >= 94.3) return 310000;
+            if (achievementRate >= 91.5) return 300000;
+            if (achievementRate >= 88.6) return 290000;
+            if (achievementRate >= 85.8) return 280000;
+            if (achievementRate >= 82.9) return 270000;
+            if (achievementRate >= 82.5) return 260000;
+            return 250000;
+        }
+
+        function getStoreAchievementBonus(achievementRate, staffCount) {
+            let totalBonus = 0;
+            if (achievementRate >= 150) totalBonus = 290000;
+            else if (achievementRate >= 140) totalBonus = 240000;
+            else if (achievementRate >= 130) totalBonus = 190000;
+            else if (achievementRate >= 120) totalBonus = 140000;
+            else if (achievementRate >= 110) totalBonus = 100000;
+            else if (achievementRate >= 100) totalBonus = 70000;
+            else return 0;
+            
+            return Math.floor(totalBonus / staffCount);
+        }
+
+        function calculateStorePL(storeId, additionalSales) {
+            const store = storeData[storeId];
+            
+            const sales = store.performance + store.subscription + additionalSales;
+            const achievementRate = (sales / store.responsibility) * 100;
+            
+            const cogs = Math.floor(sales * 0.272);
+            const paymentFee = Math.floor(sales * 0.0353);
+            const grossProfit = sales - cogs - paymentFee;
+            
+            let totalSalary = 0;
+            store.staffList.forEach(staff => {
+                if (staff.role === 'MD') {
+                    totalSalary += getMDSalary(achievementRate);
+                } else {
+                    totalSalary += baseSalary[staff.role] + roleSalary[staff.role];
+                }
+            });
+            
+            const storeBonus = getStoreAchievementBonus(achievementRate, store.staff);
+            totalSalary += storeBonus * store.staff;
+            
+            const houkenhiBase = totalSalary + store.fixedCosts.zatsukyuu + store.fixedCosts.pmReward;
+            const houkenhi = Math.floor(houkenhiBase * 0.13);
+            
+            const storeFCTotal = Object.values(store.fixedCosts).reduce((a, b) => a + b, 0);
+            const commonFCTotal = Object.values(commonFixedCosts).reduce((a, b) => a + b, 0);
+            
+            const totalSGA = totalSalary + houkenhi + storeFCTotal + commonFCTotal;
+            const operatingProfit = grossProfit - totalSGA;
+            
+            return {
+                sales,
+                achievementRate,
+                cogs,
+                paymentFee,
+                grossProfit,
+                totalSalary,
+                houkenhi,
+                totalSGA,
+                operatingProfit,
+                additionalSales,
+                fixedCosts: store.fixedCosts,
+                commonFixedCosts
+            };
+        }
+
+        const plItems = [
+            { section: 'シミュレーション結果', items: [
+                { label: '増加額', id: 'increase' },
+                { label: '想定売上', id: 'sales' },
+                { label: '達成率', id: 'achievement' }
+            ]},
+            { section: '損益計算書', items: [
+                { label: '売上高', id: 'revenue' },
+                { label: '仕入', id: 'cogs' },
+                { label: '支払手数料', id: 'paymentfee' },
+                { label: '売上総利益', id: 'gross', highlight: 'total' }
+            ]},
+            { section: '販売管理費', items: [
+                { label: '給料手当', id: 'salary' },
+                { label: '雑給', id: 'zatsukyuu' },
+                { label: '法定福利費', id: 'houkenhi' },
+                { label: 'PM報酬', id: 'pmreward' },
+                { label: '衛生費', id: 'eisei' },
+                { label: '物流管理費', id: 'butsuryuu' },
+                { label: '地代家賃', id: 'chidai' },
+                { label: '外注費', id: 'gaichu' },
+                { label: '荷造運賃', id: 'nikuzukuri' },
+                { label: '広告宣伝費', id: 'koukoku' },
+                { label: '旅費交通費', id: 'ryohi' },
+                { label: '通信費', id: 'tsushin' },
+                { label: '販売促進費', id: 'hanbai' },
+                { label: '消耗品費', id: 'shoumou' },
+                { label: '事務用品費', id: 'jimu' },
+                { label: '水道光熱費', id: 'suido' },
+                { label: 'リース料', id: 'lease' },
+                { label: '保険料', id: 'hoken' },
+                { label: '支払報酬料', id: 'houshuu' },
+                { label: '減価償却費', id: 'genka' },
+                { label: '管理諸費', id: 'kanri' },
+                { label: '販管費合計', id: 'totalsga', highlight: 'total' }
+            ]},
+            { section: '営業利益', items: [
+                { label: '営業利益', id: 'operating', highlight: 'profit' }
+            ]}
+        ];
+
+        function createPLRows() {
+            const grid = document.getElementById('plGrid');
+            
+            plItems.forEach(section => {
+                const divider = document.createElement('div');
+                divider.className = 'section-divider';
+                divider.textContent = '▼ ' + section.section;
+                grid.appendChild(divider);
+                
+                section.items.forEach(item => {
+                    const label = document.createElement('div');
+                    label.className = 'pl-label';
+                    label.textContent = item.label;
+                    grid.appendChild(label);
+                    
+                    for (let i = -1; i < 6; i++) {
+                        const cell = document.createElement('div');
+                        cell.className = 'result-cell';
+                        if (item.highlight === 'total') cell.classList.add('highlight-total');
+                        if (item.highlight === 'profit') cell.classList.add('highlight-profit');
+                        cell.id = i === -1 ? `${item.id}-total` : `${item.id}-${i}`;
+                        cell.textContent = '-';
+                        grid.appendChild(cell);
+                    }
+                });
+            });
+        }
+
+        function updateDisplay() {
+            const storeIds = ['shimizu', 'shizuoka', 'kakegawa', 'ichino', 'sanaruda', 'hiroshima'];
+            const commonIncrease = (parseFloat(document.getElementById('commonIncrease').value) || 0) * 10000;
+            
+            let totals = {
+                increase: 0,
+                sales: 0,
+                responsibility: 0,
+                revenue: 0,
+                cogs: 0,
+                paymentFee: 0,
+                grossProfit: 0,
+                salary: 0,
+                zatsukyuu: 0,
+                houkenhi: 0,
+                pmreward: 0,
+                eisei: 0,
+                butsuryuu: 0,
+                chidai: 0,
+                gaichu: 0,
+                nikuzukuri: 0,
+                koukoku: 0,
+                ryohi: 0,
+                tsushin: 0,
+                hanbai: 0,
+                shoumou: 0,
+                jimu: 0,
+                suido: 0,
+                lease: 0,
+                hoken: 0,
+                houshuu: 0,
+                genka: 0,
+                kanri: 0,
+                totalSGA: 0,
+                operatingProfit: 0
+            };
+            
+            storeIds.forEach((storeId, index) => {
+                const individualIncrease = (parseFloat(document.getElementById(storeId).value) || 0) * 10000;
+                const totalIncrease = commonIncrease + individualIncrease;
+                
+                const result = calculateStorePL(storeId, totalIncrease);
+                
+                totals.increase += result.additionalSales;
+                totals.sales += result.sales;
+                totals.responsibility += storeData[storeId].responsibility;
+                totals.revenue += result.sales;
+                totals.cogs += result.cogs;
+                totals.paymentFee += result.paymentFee;
+                totals.grossProfit += result.grossProfit;
+                totals.salary += result.totalSalary;
+                totals.zatsukyuu += result.fixedCosts.zatsukyuu;
+                totals.houkenhi += result.houkenhi;
+                totals.pmreward += result.fixedCosts.pmReward;
+                totals.eisei += result.fixedCosts.eisei;
+                totals.butsuryuu += result.commonFixedCosts.butsuryuu;
+                totals.chidai += result.fixedCosts.chidai;
+                totals.gaichu += result.commonFixedCosts.gaichu;
+                totals.nikuzukuri += result.commonFixedCosts.nikuzukuri;
+                totals.koukoku += result.commonFixedCosts.koukoku;
+                totals.ryohi += result.fixedCosts.ryohi;
+                totals.tsushin += result.fixedCosts.tsushin;
+                totals.hanbai += result.commonFixedCosts.hanbai;
+                totals.shoumou += result.fixedCosts.shoumou;
+                totals.jimu += result.fixedCosts.jimu;
+                totals.suido += result.fixedCosts.suido;
+                totals.lease += result.commonFixedCosts.lease;
+                totals.hoken += result.commonFixedCosts.hoken;
+                totals.houshuu += result.commonFixedCosts.houshuu;
+                totals.genka += result.commonFixedCosts.genka;
+                totals.kanri += result.fixedCosts.kanri;
+                totals.totalSGA += result.totalSGA;
+                totals.operatingProfit += result.operatingProfit;
+                
+                document.getElementById(`increase-${index}`).textContent = formatNumber(result.additionalSales);
+                document.getElementById(`sales-${index}`).textContent = formatNumber(result.sales);
+                document.getElementById(`achievement-${index}`).textContent = result.achievementRate.toFixed(1) + '%';
+                document.getElementById(`revenue-${index}`).textContent = formatNumber(result.sales);
+                document.getElementById(`cogs-${index}`).textContent = formatNumber(result.cogs);
+                document.getElementById(`paymentfee-${index}`).textContent = formatNumber(result.paymentFee);
+                document.getElementById(`gross-${index}`).textContent = formatNumber(result.grossProfit);
+                document.getElementById(`salary-${index}`).textContent = formatNumber(result.totalSalary);
+                document.getElementById(`zatsukyuu-${index}`).textContent = formatNumber(result.fixedCosts.zatsukyuu);
+                document.getElementById(`houkenhi-${index}`).textContent = formatNumber(result.houkenhi);
+                document.getElementById(`pmreward-${index}`).textContent = formatNumber(result.fixedCosts.pmReward);
+                document.getElementById(`eisei-${index}`).textContent = formatNumber(result.fixedCosts.eisei);
+                document.getElementById(`butsuryuu-${index}`).textContent = formatNumber(result.commonFixedCosts.butsuryuu);
+                document.getElementById(`chidai-${index}`).textContent = formatNumber(result.fixedCosts.chidai);
+                document.getElementById(`gaichu-${index}`).textContent = formatNumber(result.commonFixedCosts.gaichu);
+                document.getElementById(`nikuzukuri-${index}`).textContent = formatNumber(result.commonFixedCosts.nikuzukuri);
+                document.getElementById(`koukoku-${index}`).textContent = formatNumber(result.commonFixedCosts.koukoku);
+                document.getElementById(`ryohi-${index}`).textContent = formatNumber(result.fixedCosts.ryohi);
+                document.getElementById(`tsushin-${index}`).textContent = formatNumber(result.fixedCosts.tsushin);
+                document.getElementById(`hanbai-${index}`).textContent = formatNumber(result.commonFixedCosts.hanbai);
+                document.getElementById(`shoumou-${index}`).textContent = formatNumber(result.fixedCosts.shoumou);
+                document.getElementById(`jimu-${index}`).textContent = formatNumber(result.fixedCosts.jimu);
+                document.getElementById(`suido-${index}`).textContent = formatNumber(result.fixedCosts.suido);
+                document.getElementById(`lease-${index}`).textContent = formatNumber(result.commonFixedCosts.lease);
+                document.getElementById(`hoken-${index}`).textContent = formatNumber(result.commonFixedCosts.hoken);
+                document.getElementById(`houshuu-${index}`).textContent = formatNumber(result.commonFixedCosts.houshuu);
+                document.getElementById(`genka-${index}`).textContent = formatNumber(result.commonFixedCosts.genka);
+                document.getElementById(`kanri-${index}`).textContent = formatNumber(result.fixedCosts.kanri);
+                document.getElementById(`totalsga-${index}`).textContent = formatNumber(result.totalSGA);
+                document.getElementById(`operating-${index}`).textContent = formatNumber(result.operatingProfit);
+            });
+            
+            const totalAchievementRate = (totals.sales / totals.responsibility) * 100;
+            
+            document.getElementById('total-sales').textContent = formatNumber(totals.sales);
+            const profitElement = document.getElementById('total-profit');
+            profitElement.textContent = formatNumber(totals.operatingProfit);
+            profitElement.className = 'kpi-value ' + (totals.operatingProfit >= 0 ? 'profit-positive' : 'profit-negative');
+            
+            document.getElementById('increase-total').textContent = formatNumber(totals.increase);
+            document.getElementById('sales-total').textContent = formatNumber(totals.sales);
+            document.getElementById('achievement-total').textContent = totalAchievementRate.toFixed(1) + '%';
+            document.getElementById('revenue-total').textContent = formatNumber(totals.revenue);
+            document.getElementById('cogs-total').textContent = formatNumber(totals.cogs);
+            document.getElementById('paymentfee-total').textContent = formatNumber(totals.paymentFee);
+            document.getElementById('gross-total').textContent = formatNumber(totals.grossProfit);
+            document.getElementById('salary-total').textContent = formatNumber(totals.salary);
+            document.getElementById('zatsukyuu-total').textContent = formatNumber(totals.zatsukyuu);
+            document.getElementById('houkenhi-total').textContent = formatNumber(totals.houkenhi);
+            document.getElementById('pmreward-total').textContent = formatNumber(totals.pmreward);
+            document.getElementById('eisei-total').textContent = formatNumber(totals.eisei);
+            document.getElementById('butsuryuu-total').textContent = formatNumber(totals.butsuryuu);
+            document.getElementById('chidai-total').textContent = formatNumber(totals.chidai);
+            document.getElementById('gaichu-total').textContent = formatNumber(totals.gaichu);
+            document.getElementById('nikuzukuri-total').textContent = formatNumber(totals.nikuzukuri);
+            document.getElementById('koukoku-total').textContent = formatNumber(totals.koukoku);
+            document.getElementById('ryohi-total').textContent = formatNumber(totals.ryohi);
+            document.getElementById('tsushin-total').textContent = formatNumber(totals.tsushin);
+            document.getElementById('hanbai-total').textContent = formatNumber(totals.hanbai);
+            document.getElementById('shoumou-total').textContent = formatNumber(totals.shoumou);
+            document.getElementById('jimu-total').textContent = formatNumber(totals.jimu);
+            document.getElementById('suido-total').textContent = formatNumber(totals.suido);
+            document.getElementById('lease-total').textContent = formatNumber(totals.lease);
+            document.getElementById('hoken-total').textContent = formatNumber(totals.hoken);
+            document.getElementById('houshuu-total').textContent = formatNumber(totals.houshuu);
+            document.getElementById('genka-total').textContent = formatNumber(totals.genka);
+            document.getElementById('kanri-total').textContent = formatNumber(totals.kanri);
+            document.getElementById('totalsga-total').textContent = formatNumber(totals.totalSGA);
+            document.getElementById('operating-total').textContent = formatNumber(totals.operatingProfit);
+        }
+
+        function formatNumber(num) {
+            if (num === 0) return '0万';
+            return Math.floor(num / 10000).toLocaleString() + '万';
+        }
+
+        function calculatePL() {
+            updateDisplay();
+        }
+
+        function exportCSV() {
+            const storeNames = ['全体合計', '清水店', '静岡店', '掛川店', '市野店', '佐鳴台店', '広島店'];
+            const items = [];
+            
+            plItems.forEach(section => {
+                section.items.forEach(item => {
+                    items.push({ label: item.label, id: item.id });
+                });
+            });
+            
+            let csv = '項目,' + storeNames.join(',') + '\n';
+            
+            items.forEach(item => {
+                let row = [item.label];
+                row.push(document.getElementById(`${item.id}-total`).textContent);
+                for (let i = 0; i < 6; i++) {
+                    row.push(document.getElementById(`${item.id}-${i}`).textContent);
+                }
+                csv += row.join(',') + '\n';
+            });
+            
+            const bom = new Uint8Array([0xEF, 0xBB, 0xBF]);
+            const blob = new Blob([bom, csv], { type: 'text/csv;charset=utf-8;' });
+            const link = document.createElement('a');
+            const url = URL.createObjectURL(blob);
+            
+            const now = new Date();
+            const timestamp = now.getFullYear() + 
+                            String(now.getMonth() + 1).padStart(2, '0') + 
+                            String(now.getDate()).padStart(2, '0') + '_' +
+                            String(now.getHours()).padStart(2, '0') + 
+                            String(now.getMinutes()).padStart(2, '0');
+            
+            link.setAttribute('href', url);
+            link.setAttribute('download', `店舗PL_${timestamp}.csv`);
+            link.style.visibility = 'hidden';
+            document.body.appendChild(link);
+            link.click();
+            document.body.removeChild(link);
+        }
+
+        window.addEventListener('DOMContentLoaded', () => {
+            createPLRows();
+            updateDisplay();
+        });
+    </script>
+</body>
+</html>
