@@ -1,0 +1,1227 @@
+<!DOCTYPE html>
+<html lang="ja">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>2店舗合算PL通常シミュレーター</title>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+        
+        body {
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            background-color: #f0fdfa;
+            color: #1e293b;
+            line-height: 1.6;
+        }
+        
+        .app-container {
+            max-width: 1400px;
+            margin: 0 auto;
+            padding: 20px;
+        }
+        
+        .app-header {
+            background: linear-gradient(135deg, #14b8a6 0%, #0d9488 100%);
+            color: white;
+            padding: 25px;
+            border-radius: 12px;
+            text-align: center;
+            margin-bottom: 20px;
+            box-shadow: 0 4px 16px rgba(20, 184, 166, 0.2);
+        }
+        
+        .app-title {
+            font-size: 26px;
+            font-weight: 700;
+            margin-bottom: 8px;
+        }
+        
+        .app-subtitle {
+            font-size: 15px;
+            opacity: 0.9;
+        }
+        
+        .top-section {
+            background: white;
+            padding: 15px 20px;
+            border-radius: 12px;
+            margin-bottom: 15px;
+            box-shadow: 0 2px 8px rgba(0,0,0,0.06);
+            border: 1px solid #99f6e4;
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 25px;
+        }
+        
+        .section-title {
+            font-size: 16px;
+            font-weight: 700;
+            color: #0f766e;
+            margin-bottom: 10px;
+        }
+        
+        .store-table {
+            width: 100%;
+            border-collapse: collapse;
+        }
+        
+        .store-table th {
+            background: #ccfbf1;
+            padding: 6px 8px;
+            text-align: center;
+            font-weight: 600;
+            color: #0f766e;
+            border: 1px solid #5eead4;
+            font-size: 11px;
+        }
+        
+        .store-table td {
+            padding: 8px;
+            text-align: center;
+            border: 1px solid #99f6e4;
+            font-size: 12px;
+            background: white;
+            cursor: pointer;
+            transition: all 0.2s ease;
+        }
+        
+        .store-table td:hover {
+            background: #ccfbf1;
+        }
+        
+        .store-table td.selected {
+            background: #99f6e4;
+            font-weight: 600;
+        }
+        
+        .selection-status {
+            margin-top: 10px;
+            padding: 8px;
+            background: #ccfbf1;
+            border-radius: 6px;
+            font-size: 12px;
+            color: #0f766e;
+            text-align: center;
+            font-weight: 600;
+        }
+        
+        .input-wrapper {
+            display: grid;
+            grid-template-columns: 1fr 180px;
+            gap: 15px;
+            align-items: end;
+        }
+        
+        .input-label {
+            font-weight: 600;
+            color: #0f766e;
+            font-size: 14px;
+            margin-bottom: 8px;
+        }
+        
+        .input-field {
+            padding: 10px 14px;
+            border: 2px solid #5eead4;
+            border-radius: 8px;
+            font-size: 15px;
+            width: 100%;
+        }
+        
+        .input-field:focus {
+            outline: none;
+            border-color: #14b8a6;
+            box-shadow: 0 0 0 3px rgba(20, 184, 166, 0.1);
+        }
+        
+        .execute-button {
+            background: linear-gradient(135deg, #14b8a6 0%, #0d9488 100%);
+            color: white;
+            border: none;
+            padding: 12px 20px;
+            border-radius: 8px;
+            font-size: 15px;
+            font-weight: 600;
+            cursor: pointer;
+            transition: all 0.3s ease;
+        }
+        
+        .execute-button:hover:not(:disabled) {
+            transform: translateY(-2px);
+            box-shadow: 0 6px 20px rgba(20, 184, 166, 0.3);
+        }
+        
+        .execute-button:disabled {
+            opacity: 0.5;
+            cursor: not-allowed;
+        }
+        
+        .kpi-section {
+            margin-bottom: 15px;
+            display: none;
+            gap: 20px;
+        }
+        
+        .kpi-section.active {
+            display: flex;
+        }
+        
+        .kpi-box {
+            flex: 1;
+            background: linear-gradient(135deg, #f97316 0%, #ea580c 100%);
+            padding: 12px 15px;
+            border-radius: 8px;
+            text-align: center;
+        }
+        
+        .kpi-label {
+            font-size: 13px;
+            color: white;
+            font-weight: 600;
+            margin-bottom: 6px;
+        }
+        
+        .kpi-value {
+            font-size: 24px;
+            font-weight: 700;
+            color: white;
+            font-family: 'Courier New', monospace;
+        }
+        
+        .main-content {
+            display: grid;
+            grid-template-columns: 500px 1fr;
+            gap: 20px;
+        }
+        
+        .pl-section {
+            background: white;
+            border-radius: 12px;
+            box-shadow: 0 2px 8px rgba(0,0,0,0.06);
+            border: 1px solid #99f6e4;
+            overflow: hidden;
+            height: fit-content;
+        }
+        
+        .pl-header {
+            background: linear-gradient(135deg, #0f766e 0%, #0d9488 100%);
+            color: white;
+            padding: 12px 15px;
+            font-size: 16px;
+            font-weight: 700;
+        }
+        
+        .pl-table {
+            width: 100%;
+            border-collapse: collapse;
+            font-size: 11px;
+        }
+        
+        .pl-table th {
+            background: #ccfbf1;
+            padding: 4px 8px;
+            text-align: left;
+            font-weight: 600;
+            color: #0f766e;
+            border: 1px solid #5eead4;
+            font-size: 10px;
+        }
+        
+        .pl-table td {
+            padding: 3px 8px;
+            border: 1px solid #99f6e4;
+        }
+        
+        .pl-amount {
+            font-family: 'Courier New', monospace;
+            font-weight: 600;
+            text-align: right;
+        }
+        
+        .pl-positive { color: #14b8a6; }
+        .pl-negative { color: #dc2626; }
+        
+        .pl-highlight {
+            background: #fef3c7 !important;
+            font-weight: 700;
+        }
+        
+        .pl-category {
+            background: #99f6e4 !important;
+            font-weight: 700;
+            color: #0f766e;
+        }
+        
+        .salary-section {
+            background: white;
+            border-radius: 12px;
+            box-shadow: 0 2px 8px rgba(0,0,0,0.06);
+            border: 1px solid #99f6e4;
+            overflow: hidden;
+        }
+        
+        .salary-header {
+            background: linear-gradient(135deg, #0f766e 0%, #0d9488 100%);
+            color: white;
+            padding: 12px 15px;
+            font-size: 16px;
+            font-weight: 700;
+        }
+        
+        .salary-content {
+            padding: 15px;
+        }
+        
+        .stores-container {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 15px;
+        }
+        
+        .store-block {
+            border: 1px solid #99f6e4;
+            border-radius: 8px;
+            overflow: hidden;
+        }
+        
+        .store-block-header {
+            background: linear-gradient(135deg, #0f766e 0%, #0d9488 100%);
+            color: white;
+            padding: 8px 12px;
+            font-weight: 700;
+            font-size: 14px;
+        }
+        
+        .store-summary {
+            background: #ccfbf1;
+            border: 2px solid #5eead4;
+            border-radius: 8px;
+            padding: 12px;
+            margin: 12px;
+            display: grid;
+            grid-template-columns: 1fr 1fr 1fr;
+            grid-template-rows: auto auto;
+            gap: 8px 8px;
+        }
+        
+        .summary-item {
+            display: flex;
+            align-items: center;
+            gap: 4px;
+        }
+        
+        .summary-label {
+            font-size: 10px;
+            color: #0f766e;
+            font-weight: 600;
+            white-space: nowrap;
+        }
+        
+        .summary-value {
+            font-size: 13px;
+            font-weight: 700;
+            color: #1e293b;
+            font-family: 'Courier New', monospace;
+        }
+        
+        .summary-value.emphasis {
+            color: #14b8a6;
+        }
+        
+        .summary-unit {
+            font-size: 9px;
+            font-weight: 600;
+        }
+        
+        .staff-cards {
+            max-height: 680px;
+            overflow-y: auto;
+            padding: 0 12px 12px 12px;
+        }
+        
+        .staff-card {
+            border: 1px solid #99f6e4;
+            border-radius: 6px;
+            overflow: hidden;
+            margin-bottom: 6px;
+        }
+        
+        .staff-header {
+            background: linear-gradient(135deg, #6b7280 0%, #4b5563 100%);
+            color: white;
+            padding: 6px 10px;
+            display: flex;
+            justify-content: space-between;
+        }
+        
+        .staff-name {
+            font-weight: 700;
+            font-size: 11px;
+        }
+        
+        .staff-position {
+            font-size: 9px;
+            opacity: 0.9;
+        }
+        
+        .staff-sales {
+            font-size: 9px;
+            text-align: right;
+        }
+        
+        .salary-grid {
+            padding: 8px;
+            display: grid;
+            grid-template-columns: 1fr 1fr 1fr;
+            gap: 4px;
+        }
+        
+        .salary-item {
+            display: flex;
+            justify-content: space-between;
+            padding: 3px 5px;
+            background: #ccfbf1;
+            border-radius: 3px;
+            font-size: 9px;
+        }
+        
+        .salary-label {
+            color: #0f766e;
+            font-weight: 500;
+        }
+        
+        .salary-value {
+            font-family: 'Courier New', monospace;
+            font-weight: 600;
+            color: #0d9488;
+        }
+        
+        .salary-total {
+            background: linear-gradient(135deg, #14b8a6 0%, #0d9488 100%);
+            color: white;
+            grid-column: 1 / -1;
+        }
+        
+        .salary-total .salary-label,
+        .salary-total .salary-value {
+            color: white;
+        }
+        
+        @media (max-width: 1200px) {
+            .main-content {
+                grid-template-columns: 1fr;
+            }
+            
+            .stores-container {
+                grid-template-columns: 1fr;
+            }
+        }
+        
+        @media (max-width: 768px) {
+            .top-section {
+                grid-template-columns: 1fr;
+            }
+            
+            .kpi-section {
+                flex-direction: column;
+            }
+            
+            .input-wrapper {
+                grid-template-columns: 1fr;
+            }
+        }
+    </style>
+</head>
+<body>
+    <div class="app-container">
+        <div class="app-header">
+            <div class="app-title">2店舗合算PL通常シミュレーター</div>
+            <div class="app-subtitle">2店舗の想定売上から合算損益と個人別給与を算出</div>
+        </div>
+        
+        <div class="top-section">
+            <div>
+                <div class="section-title">🏢 2店舗選択(チェックボックス)</div>
+                <table class="store-table">
+                    <thead>
+                        <tr>
+                            <th>清水店</th>
+                            <th>静岡店</th>
+                            <th>掛川店</th>
+                            <th>市野店</th>
+                            <th>佐鳴台店</th>
+                            <th>広島店</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        <tr>
+                            <td onclick="toggleStore('shimizu', event)">
+                                <input type="checkbox" id="shimizu" value="shimizu">
+                                清水店
+                            </td>
+                            <td onclick="toggleStore('shizuoka', event)">
+                                <input type="checkbox" id="shizuoka" value="shizuoka">
+                                静岡店
+                            </td>
+                            <td onclick="toggleStore('kakegawa', event)">
+                                <input type="checkbox" id="kakegawa" value="kakegawa">
+                                掛川店
+                            </td>
+                            <td onclick="toggleStore('ichino', event)">
+                                <input type="checkbox" id="ichino" value="ichino">
+                                市野店
+                            </td>
+                            <td onclick="toggleStore('sanaru', event)">
+                                <input type="checkbox" id="sanaru" value="sanaru">
+                                佐鳴台店
+                            </td>
+                            <td onclick="toggleStore('hiroshima', event)">
+                                <input type="checkbox" id="hiroshima" value="hiroshima">
+                                広島店
+                            </td>
+                        </tr>
+                    </tbody>
+                </table>
+                <div class="selection-status" id="status">未選択｜2店舗を選択してください</div>
+            </div>
+            
+            <div>
+                <div class="section-title">📈 シミュレーション設定</div>
+                <div class="input-wrapper">
+                    <div>
+                        <div class="input-label">合算想定売上(万円)</div>
+                        <input type="number" class="input-field" id="targetSales" placeholder="例: 1500">
+                    </div>
+                    <button class="execute-button" id="executeBtn" disabled onclick="execute()">計算実行</button>
+                </div>
+            </div>
+        </div>
+        
+        <div class="kpi-section" id="kpiSection">
+            <div class="kpi-box">
+                <div class="kpi-label">合算店舗内実績</div>
+                <div class="kpi-value" id="kpi1">-</div>
+            </div>
+            <div class="kpi-box">
+                <div class="kpi-label">合算定期購入額</div>
+                <div class="kpi-value" id="kpi2">-</div>
+            </div>
+            <div class="kpi-box">
+                <div class="kpi-label">合算想定達成率</div>
+                <div class="kpi-value" id="kpi3">-</div>
+            </div>
+        </div>
+        
+        <div class="main-content">
+            <div class="pl-section">
+                <div class="pl-header">📊 合算損益計算書(PL)</div>
+                <table class="pl-table" id="plTable">
+                    <tbody>
+                        <tr class="pl-category"><td colspan="2">売上</td></tr>
+                        <tr><td>売上高</td><td class="pl-amount" id="pl-sales">-</td></tr>
+                        <tr><td>├ 店舗内実績</td><td class="pl-amount" id="pl-in-store">-</td></tr>
+                        <tr><td>└ 定期購入</td><td class="pl-amount" id="pl-periodic">-</td></tr>
+                        <tr class="pl-category"><td colspan="2">変動費</td></tr>
+                        <tr><td>仕入</td><td class="pl-amount pl-negative" id="pl-purchase">-</td></tr>
+                        <tr><td>支払手数料</td><td class="pl-amount pl-negative" id="pl-fee">-</td></tr>
+                        <tr class="pl-highlight"><td>売上総利益</td><td class="pl-amount pl-positive" id="pl-gross">-</td></tr>
+                        <tr class="pl-category"><td colspan="2">販売管理費</td></tr>
+                        <tr><td>給料手当</td><td class="pl-amount pl-negative" id="pl-salary">-</td></tr>
+                        <tr><td>├ 基本給与</td><td class="pl-amount" id="pl-basic">-</td></tr>
+                        <tr><td>├ 店舗売上手当</td><td class="pl-amount" id="pl-store-allowance">-</td></tr>
+                        <tr><td>├ 達成店舗手当</td><td class="pl-amount" id="pl-achievement-allowance">-</td></tr>
+                        <tr><td>└ 個人実績手当</td><td class="pl-amount" id="pl-personal-allowance">-</td></tr>
+                        <tr><td>雑給</td><td class="pl-amount pl-negative" id="pl-parttime">-</td></tr>
+                        <tr><td>PM報酬</td><td class="pl-amount pl-negative" id="pl-pm">-</td></tr>
+                        <tr><td>法定福利費</td><td class="pl-amount pl-negative" id="pl-welfare">-</td></tr>
+                        <tr><td>物流管理費</td><td class="pl-amount pl-negative" id="pl-logistics">-</td></tr>
+                        <tr><td>外注費</td><td class="pl-amount pl-negative" id="pl-outsource">-</td></tr>
+                        <tr><td>荷造運賃</td><td class="pl-amount pl-negative" id="pl-shipping">-</td></tr>
+                        <tr><td>広告宣伝費</td><td class="pl-amount pl-negative" id="pl-advertising">-</td></tr>
+                        <tr><td>販売促進費</td><td class="pl-amount pl-negative" id="pl-promotion">-</td></tr>
+                        <tr><td>衛生費</td><td class="pl-amount pl-negative" id="pl-hygiene">-</td></tr>
+                        <tr><td>地代家賃</td><td class="pl-amount pl-negative" id="pl-rent">-</td></tr>
+                        <tr><td>旅費交通費</td><td class="pl-amount pl-negative" id="pl-travel">-</td></tr>
+                        <tr><td>通信費</td><td class="pl-amount pl-negative" id="pl-communication">-</td></tr>
+                        <tr><td>消耗品費</td><td class="pl-amount pl-negative" id="pl-supplies">-</td></tr>
+                        <tr><td>事務用品費</td><td class="pl-amount pl-negative" id="pl-office">-</td></tr>
+                        <tr><td>リース料</td><td class="pl-amount pl-negative" id="pl-lease">-</td></tr>
+                        <tr><td>保険料</td><td class="pl-amount pl-negative" id="pl-insurance">-</td></tr>
+                        <tr><td>水道光熱費</td><td class="pl-amount pl-negative" id="pl-utility">-</td></tr>
+                        <tr><td>支払報酬料</td><td class="pl-amount pl-negative" id="pl-consulting">-</td></tr>
+                        <tr><td>減価償却費</td><td class="pl-amount pl-negative" id="pl-depreciation">-</td></tr>
+                        <tr><td>管理諸費</td><td class="pl-amount pl-negative" id="pl-management">-</td></tr>
+                        <tr class="pl-highlight"><td>営業利益</td><td class="pl-amount pl-positive" id="pl-profit">-</td></tr>
+                    </tbody>
+                </table>
+            </div>
+            
+            <div class="salary-section">
+                <div class="salary-header">👥 2店舗別スタッフ給与詳細</div>
+                <div class="salary-content">
+                    <div class="stores-container" id="storesContainer">
+                        <div style="text-align: center; padding: 40px; color: #6b7280; grid-column: 1 / -1;">
+                            <div style="font-size: 48px;">🏢</div>
+                            <div style="font-size: 16px; font-weight: 600;">2店舗を選択してください</div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        let selectedStores = [];
+        
+        // 役職の順序定義
+        const positionOrder = {
+            'MD': 1,
+            'EM': 2,
+            'M': 3,
+            'SM': 4,
+            'C': 5,
+            'SC': 6,
+            'A': 7,
+            'SA': 8
+        };
+        
+        // 店舗マスタデータ
+        const storeData = {
+            shimizu: {
+                name: "清水店",
+                responsibility: 6300000,
+                periodicSales: 1218900,
+                fixedCosts: {
+                    parttime: 110000,
+                    pm: 40000,
+                    hygiene: 20000,
+                    rent: 330000,
+                    travel: 40000,
+                    communication: 20000,
+                    supplies: 20000,
+                    office: 10000,
+                    utility: 60000,
+                    management: 30000
+                },
+                staff: [
+                    {name: "佐藤愛", position: "MD", currentSales: 452229},
+                    {name: "椎田凪咲", position: "SM", currentSales: 1192714},
+                    {name: "古木彩香", position: "C", currentSales: 672560},
+                    {name: "山口純加", position: "A", currentSales: 255627}
+                ]
+            },
+            shizuoka: {
+                name: "静岡店",
+                responsibility: 4400000,
+                periodicSales: 1741000,
+                fixedCosts: {
+                    parttime: 40000,
+                    pm: 30000,
+                    hygiene: 20000,
+                    rent: 290000,
+                    travel: 30000,
+                    communication: 20000,
+                    supplies: 20000,
+                    office: 10000,
+                    utility: 70000,
+                    management: 30000
+                },
+                staff: [
+                    {name: "早川仁美", position: "MD", currentSales: 986105},
+                    {name: "湯尾あかり", position: "MD", currentSales: 585977}
+                ]
+            },
+            kakegawa: {
+                name: "掛川店",
+                responsibility: 7250000,
+                periodicSales: 900000,
+                fixedCosts: {
+                    parttime: 160000,
+                    pm: 30000,
+                    hygiene: 30000,
+                    rent: 360000,
+                    travel: 60000,
+                    communication: 10000,
+                    supplies: 20000,
+                    office: 20000,
+                    utility: 120000,
+                    management: 30000
+                },
+                staff: [
+                    {name: "海野由佳", position: "MD", currentSales: 1006301},
+                    {name: "西村芽久美", position: "SM", currentSales: 729770},
+                    {name: "良知美咲", position: "SM", currentSales: 190842},
+                    {name: "守屋繭", position: "C", currentSales: 991423},
+                    {name: "海野安美", position: "C", currentSales: 891877}
+                ]
+            },
+            ichino: {
+                name: "市野店",
+                responsibility: 7300000,
+                periodicSales: 685400,
+                fixedCosts: {
+                    parttime: 10000,
+                    pm: 0,
+                    hygiene: 30000,
+                    rent: 200000,
+                    travel: 40000,
+                    communication: 30000,
+                    supplies: 20000,
+                    office: 10000,
+                    utility: 70000,
+                    management: 30000
+                },
+                staff: [
+                    {name: "大橋亜季", position: "EM", currentSales: 3423440},
+                    {name: "田中奈智", position: "M", currentSales: 1388690},
+                    {name: "田中莉央", position: "MD", currentSales: 476234},
+                    {name: "足立裕美", position: "C", currentSales: 559634},
+                    {name: "長島叶沙", position: "SC", currentSales: 787216}
+                ]
+            },
+            sanaru: {
+                name: "佐鳴台店",
+                responsibility: 5230000,
+                periodicSales: 1068900,
+                fixedCosts: {
+                    parttime: 50000,
+                    pm: 30000,
+                    hygiene: 10000,
+                    rent: 220000,
+                    travel: 40000,
+                    communication: 20000,
+                    supplies: 20000,
+                    office: 10000,
+                    utility: 50000,
+                    management: 30000
+                },
+                staff: [
+                    {name: "太田香", position: "MD", currentSales: 393755},
+                    {name: "村木咲良", position: "SM", currentSales: 1135208},
+                    {name: "中井星瑠佳", position: "C", currentSales: 649474}
+                ]
+            },
+            hiroshima: {
+                name: "広島店",
+                responsibility: 6080000,
+                periodicSales: 1600000,
+                fixedCosts: {
+                    parttime: 50000,
+                    pm: 40000,
+                    hygiene: 10000,
+                    rent: 460000,
+                    travel: 90000,
+                    communication: 30000,
+                    supplies: 20000,
+                    office: 20000,
+                    utility: 60000,
+                    management: 30000
+                },
+                staff: [
+                    {name: "浅野智美", position: "MD", currentSales: 375707},
+                    {name: "大矢美由紀", position: "MD", currentSales: 1271088},
+                    {name: "土井長観美", position: "SC", currentSales: 499582},
+                    {name: "河内流美", position: "A", currentSales: 422801}
+                ]
+            }
+        };
+        
+        // 役職別基本給
+        const baseSalary = {
+            MD: 350000,
+            EM: 300000,
+            M: 280000,
+            SM: 270000,
+            C: 260000,
+            SC: 250000,
+            A: 240000,
+            SA: 230000
+        };
+        
+        // 役職別役職給
+        const roleAllowance = {
+            MD: 0,
+            EM: 0,
+            M: 50000,
+            SM: 40000,
+            C: 30000,
+            SC: 20000,
+            A: 10000,
+            SA: 0
+        };
+        
+        // 全社共通固定費（1店舗あたりの月額）
+        const fixedCostPerStore = {
+            logistics: 350000,
+            outsource: 210000,
+            shipping: 120000,
+            advertising: 50000,
+            promotion: 70000,
+            lease: 10000,
+            insurance: 10000,
+            consulting: 60000,
+            depreciation: 40000
+        };
+        
+        // スタッフを役職順にソート
+        function sortStaffByPosition(staffArray) {
+            return [...staffArray].sort((a, b) => {
+                return (positionOrder[a.position] || 99) - (positionOrder[b.position] || 99);
+            });
+        }
+        
+        function toggleStore(storeId, e) {
+            if (e.target.tagName === 'INPUT') return;
+            const checkbox = document.getElementById(storeId);
+            checkbox.checked = !checkbox.checked;
+            updateSelection();
+        }
+        
+        function updateSelection() {
+            selectedStores = [];
+            document.querySelectorAll('input[type="checkbox"]:checked').forEach(cb => {
+                selectedStores.push(cb.value);
+            });
+            
+            document.querySelectorAll('.store-table td').forEach(td => {
+                const checkbox = td.querySelector('input');
+                if (checkbox) {
+                    if (selectedStores.length === 2 && !checkbox.checked) {
+                        checkbox.disabled = true;
+                        td.style.opacity = '0.5';
+                    } else {
+                        checkbox.disabled = false;
+                        td.style.opacity = '1';
+                    }
+                    td.classList.toggle('selected', checkbox.checked);
+                }
+            });
+            
+            const status = document.getElementById('status');
+            if (selectedStores.length === 0) {
+                status.textContent = '未選択｜2店舗を選択してください';
+            } else if (selectedStores.length === 1) {
+                status.textContent = `選択済み: ${storeData[selectedStores[0]].name}｜あと1店舗選択`;
+            } else {
+                status.textContent = `選択済み: ${storeData[selectedStores[0]].name}、${storeData[selectedStores[1]].name}｜選択完了`;
+            }
+            
+            updateDisplay();
+        }
+        
+        function updateDisplay() {
+            const container = document.getElementById('storesContainer');
+            
+            if (selectedStores.length !== 2) {
+                container.innerHTML = '<div style="text-align: center; padding: 40px; color: #6b7280; grid-column: 1 / -1;"><div style="font-size: 48px;">🏢</div><div style="font-size: 16px; font-weight: 600;">2店舗を選択してください</div></div>';
+                document.getElementById('kpiSection').classList.remove('active');
+                document.getElementById('executeBtn').disabled = true;
+                return;
+            }
+            
+            const stores = selectedStores.map(id => storeData[id]);
+            const totalSales = stores.reduce((sum, s) => sum + s.staff.reduce((s2, st) => s2 + st.currentSales, 0), 0);
+            const totalPeriodic = stores.reduce((sum, s) => sum + s.periodicSales, 0);
+            const totalResponsibility = stores.reduce((sum, s) => sum + s.responsibility, 0);
+            const currentRate = ((totalSales + totalPeriodic) / totalResponsibility * 100).toFixed(1);
+            
+            document.getElementById('kpi1').textContent = (totalSales/10000).toFixed(1) + '万円';
+            document.getElementById('kpi2').textContent = (totalPeriodic/10000).toFixed(1) + '万円';
+            document.getElementById('kpi3').textContent = currentRate + '%';
+            document.getElementById('kpiSection').classList.add('active');
+            
+            container.innerHTML = stores.map(store => {
+                const storeSales = store.staff.reduce((sum, s) => sum + s.currentSales, 0);
+                const rate = ((storeSales + store.periodicSales) / store.responsibility * 100).toFixed(1);
+                const sortedStaff = sortStaffByPosition(store.staff);
+                
+                return `
+                    <div class="store-block">
+                        <div class="store-block-header">${store.name}</div>
+                        <div class="store-summary">
+                            <div class="summary-item">
+                                <span class="summary-label">責任額:</span>
+                                <span class="summary-value emphasis">${(store.responsibility/10000).toFixed(0)}<span class="summary-unit">万</span></span>
+                            </div>
+                            <div class="summary-item">
+                                <span class="summary-label">定期購入:</span>
+                                <span class="summary-value emphasis">${(store.periodicSales/10000).toFixed(1)}<span class="summary-unit">万</span></span>
+                            </div>
+                            <div class="summary-item">
+                                <span class="summary-label">店舗実績:</span>
+                                <span class="summary-value">${(storeSales/10000).toFixed(1)}<span class="summary-unit">万</span></span>
+                            </div>
+                            <div class="summary-item">
+                                <span class="summary-label">現在達成率:</span>
+                                <span class="summary-value" style="color: ${rate >= 100 ? '#059669' : '#dc2626'};">${rate}%</span>
+                            </div>
+                            <div class="summary-item">
+                                <span class="summary-label">人数:</span>
+                                <span class="summary-value">${store.staff.length}名</span>
+                            </div>
+                            <div class="summary-item"></div>
+                        </div>
+                        <div class="staff-cards">
+                            ${sortedStaff.map(s => `
+                                <div class="staff-card">
+                                    <div class="staff-header">
+                                        <div>
+                                            <div class="staff-name">${s.name}</div>
+                                            <div class="staff-position">${s.position}</div>
+                                        </div>
+                                        <div class="staff-sales">現在: ${(s.currentSales/10000).toFixed(1)}万円</div>
+                                    </div>
+                                    <div class="salary-grid">
+                                        <div class="salary-item"><span class="salary-label">現在実績</span><span class="salary-value">${(s.currentSales/10000).toFixed(1)}万</span></div>
+                                        <div class="salary-item"><span class="salary-label">基本給</span><span class="salary-value">-</span></div>
+                                        <div class="salary-item"><span class="salary-label">店舗手当</span><span class="salary-value">-</span></div>
+                                        <div class="salary-item"><span class="salary-label">加算額</span><span class="salary-value">-</span></div>
+                                        <div class="salary-item"><span class="salary-label">役職給</span><span class="salary-value">-</span></div>
+                                        <div class="salary-item"><span class="salary-label">個人手当</span><span class="salary-value">-</span></div>
+                                        <div class="salary-item"><span class="salary-label">個人目標</span><span class="salary-value">-</span></div>
+                                        <div class="salary-item"><span class="salary-label">達成手当</span><span class="salary-value">-</span></div>
+                                        <div class="salary-item"><span class="salary-label">その他</span><span class="salary-value">-</span></div>
+                                        <div class="salary-item salary-total"><span class="salary-label">支給合計</span><span class="salary-value">-</span></div>
+                                    </div>
+                                </div>
+                            `).join('')}
+                        </div>
+                    </div>
+                `;
+            }).join('');
+            
+            document.getElementById('executeBtn').disabled = false;
+        }
+        
+        // MD給与計算関数
+        function calculateMDSalary(achievementRate) {
+            if (achievementRate < 82.5) return 250000;
+            if (achievementRate < 82.9) return 260000;
+            if (achievementRate < 85.8) return 270000;
+            if (achievementRate < 88.6) return 280000;
+            if (achievementRate < 91.5) return 290000;
+            if (achievementRate < 94.3) return 300000;
+            if (achievementRate < 97.2) return 310000;
+            if (achievementRate < 100) return 320000;
+            return 350000;
+        }
+        
+        // 店舗売上手当計算
+        function calculateStoreSalesAllowance(position, storeSales, isAchieved) {
+            if (position === 'MD') {
+                return isAchieved ? storeSales * 0.012 : 0;
+            } else if (position === 'EM' || position === 'M') {
+                return isAchieved ? storeSales * 0.006 : storeSales * 0.003;
+            }
+            return 0;
+        }
+        
+        // 責任額達成店舗手当計算
+        function calculateAchievementAllowance(achievementRate, staffCount) {
+            if (achievementRate < 100) return 0;
+            
+            let totalAmount = 0;
+            if (achievementRate >= 150) totalAmount = 290000;
+            else if (achievementRate >= 140) totalAmount = 240000;
+            else if (achievementRate >= 130) totalAmount = 190000;
+            else if (achievementRate >= 120) totalAmount = 140000;
+            else if (achievementRate >= 110) totalAmount = 100000;
+            else totalAmount = 70000;
+            
+            return Math.floor(totalAmount / staffCount);
+        }
+        
+        // 個人実績手当計算
+        function calculatePersonalAllowance(position, personalSales, isAchieved) {
+            if (position === 'MD') return 0;
+            
+            const personalSalesInMan = personalSales / 10000;
+            let rate = 0;
+            
+            if (personalSalesInMan < 110) {
+                rate = isAchieved ? 0.01 : 0.005;
+            } else if (personalSalesInMan < 165) {
+                rate = isAchieved ? 0.015 : 0.005;
+            } else if (personalSalesInMan < 220) {
+                rate = isAchieved ? 0.03 : 0.02;
+            } else if (personalSalesInMan < 330) {
+                rate = isAchieved ? 0.04 : 0.03;
+            } else if (personalSalesInMan < 440) {
+                rate = isAchieved ? 0.05 : 0.04;
+            } else {
+                rate = isAchieved ? 0.06 : 0.05;
+            }
+            
+            return Math.floor(personalSales * rate);
+        }
+        
+        function execute() {
+            if (selectedStores.length !== 2) return;
+            
+            const targetSalesMan = parseFloat(document.getElementById('targetSales').value);
+            if (!targetSalesMan || targetSalesMan <= 0) return;
+            
+            const targetSales = targetSalesMan * 10000;
+            const stores = selectedStores.map(id => storeData[id]);
+            
+            // 合算計算
+            const totalCurrentSales = stores.reduce((sum, s) => sum + s.staff.reduce((s2, st) => s2 + st.currentSales, 0), 0);
+            const totalPeriodic = stores.reduce((sum, s) => sum + s.periodicSales, 0);
+            const totalResponsibility = stores.reduce((sum, s) => sum + s.responsibility, 0);
+            const inStoreSales = targetSales - totalPeriodic;
+            const totalAchievementRate = (targetSales / totalResponsibility) * 100;
+            const isAchieved = totalAchievementRate >= 100;
+            
+            // 店舗ごとの売上配分(責任額の比率で配分)
+            const storeAllocations = stores.map(store => {
+                const ratio = store.responsibility / totalResponsibility;
+                return targetSales * ratio;
+            });
+            
+            // PL計算
+            const pl = {
+                sales: targetSales,
+                inStoreSales: inStoreSales,
+                periodicSales: totalPeriodic,
+                purchase: Math.floor(targetSales * 0.272),
+                fee: Math.floor(targetSales * 0.0353),
+                gross: Math.floor(targetSales * 0.6927)
+            };
+            
+            // 人件費計算
+            let totalSalary = 0;
+            let totalBasicSalary = 0;
+            let totalStoreSalesAllowance = 0;
+            let totalAchievementAllowance = 0;
+            let totalPersonalAllowance = 0;
+            let totalParttime = 0;
+            let totalPM = 0;
+            const allStaffSalaries = [];
+            
+            // 各店舗の計算
+            stores.forEach((store, storeIndex) => {
+                const storeTargetSales = storeAllocations[storeIndex];
+                const storeCurrentSales = store.staff.reduce((sum, s) => sum + s.currentSales, 0);
+                const storeInStoreSales = storeTargetSales - store.periodicSales;
+                const storeIncrease = storeInStoreSales - storeCurrentSales;
+                const storeAchievementRate = (storeTargetSales / store.responsibility) * 100;
+                const storeIsAchieved = storeAchievementRate >= 100;
+                
+                totalParttime += store.fixedCosts.parttime;
+                totalPM += store.fixedCosts.pm;
+                
+                const staffSalaries = [];
+                store.staff.forEach(staff => {
+                    const additionPerStaff = Math.floor(storeIncrease / store.staff.length);
+                    const newPersonalSales = staff.currentSales + additionPerStaff;
+                    let salary = 0;
+                    
+                    // 基本給(役職給含む) - 2店舗の場合は合算達成率で判定
+                    if (staff.position === 'MD') {
+                        salary = calculateMDSalary(totalAchievementRate);
+                    } else {
+                        salary = baseSalary[staff.position] + roleAllowance[staff.position];
+                    }
+                    
+                    // 店舗売上手当(各店舗の売上で計算)
+                    const storeSalesAllowance = calculateStoreSalesAllowance(staff.position, storeTargetSales, storeIsAchieved);
+                    
+                    // 責任額達成店舗手当(各店舗の達成率で計算)
+                    const achievementAllowance = calculateAchievementAllowance(storeAchievementRate, store.staff.length);
+                    
+                    // 個人実績手当
+                    const personalAllowance = calculatePersonalAllowance(staff.position, newPersonalSales, storeIsAchieved);
+                    
+                    const totalStaffSalary = salary + storeSalesAllowance + achievementAllowance + personalAllowance;
+                    
+                    staffSalaries.push({
+                        name: staff.name,
+                        position: staff.position,
+                        currentSales: staff.currentSales,
+                        increaseSales: additionPerStaff,
+                        newSales: newPersonalSales,
+                        baseSalary: salary,
+                        storeSalesAllowance: storeSalesAllowance,
+                        achievementAllowance: achievementAllowance,
+                        personalAllowance: personalAllowance,
+                        total: totalStaffSalary
+                    });
+                    
+                    totalSalary += totalStaffSalary;
+                    totalBasicSalary += salary;
+                    totalStoreSalesAllowance += storeSalesAllowance;
+                    totalAchievementAllowance += achievementAllowance;
+                    totalPersonalAllowance += personalAllowance;
+                });
+                
+                allStaffSalaries.push({
+                    storeName: store.name,
+                    storeAchievementRate: storeAchievementRate,
+                    storeTargetSales: storeTargetSales,
+                    staffSalaries: staffSalaries
+                });
+            });
+            
+            // 法定福利費
+            pl.welfare = Math.floor((totalSalary + totalParttime + totalPM) * 0.13);
+            
+            // 店舗固定費(2店舗分合算)
+            const totalHygiene = stores.reduce((sum, s) => sum + s.fixedCosts.hygiene, 0);
+            const totalRent = stores.reduce((sum, s) => sum + s.fixedCosts.rent, 0);
+            const totalTravel = stores.reduce((sum, s) => sum + s.fixedCosts.travel, 0);
+            const totalCommunication = stores.reduce((sum, s) => sum + s.fixedCosts.communication, 0);
+            const totalSupplies = stores.reduce((sum, s) => sum + s.fixedCosts.supplies, 0);
+            const totalOffice = stores.reduce((sum, s) => sum + s.fixedCosts.office, 0);
+            const totalUtility = stores.reduce((sum, s) => sum + s.fixedCosts.utility, 0);
+            const totalManagement = stores.reduce((sum, s) => sum + s.fixedCosts.management, 0);
+            
+            const totalStoreFixed = totalHygiene + totalRent + totalTravel + totalCommunication + 
+                                   totalSupplies + totalOffice + totalUtility + totalManagement;
+            
+            // 全社固定費(2店舗分)
+            const storeCount = stores.length;
+            const totalCompanyFixed = Object.values(fixedCostPerStore).reduce((sum, val) => sum + val, 0) * storeCount;
+            
+            // 営業利益計算
+            const laborCost = totalSalary + totalParttime + totalPM + pl.welfare;
+            pl.profit = pl.gross - laborCost - totalStoreFixed - totalCompanyFixed;
+            
+            // PL表示更新
+            document.getElementById('pl-sales').textContent = (pl.sales / 10000).toFixed(1) + '万円';
+            document.getElementById('pl-in-store').textContent = (pl.inStoreSales / 10000).toFixed(1) + '万円';
+            document.getElementById('pl-periodic').textContent = (pl.periodicSales / 10000).toFixed(1) + '万円';
+            document.getElementById('pl-purchase').textContent = (pl.purchase / 10000).toFixed(1) + '万円';
+            document.getElementById('pl-fee').textContent = (pl.fee / 10000).toFixed(1) + '万円';
+            document.getElementById('pl-gross').textContent = (pl.gross / 10000).toFixed(1) + '万円';
+            document.getElementById('pl-salary').textContent = (totalSalary / 10000).toFixed(1) + '万円';
+            document.getElementById('pl-basic').textContent = (totalBasicSalary / 10000).toFixed(1) + '万円';
+            document.getElementById('pl-store-allowance').textContent = (totalStoreSalesAllowance / 10000).toFixed(1) + '万円';
+            document.getElementById('pl-achievement-allowance').textContent = (totalAchievementAllowance / 10000).toFixed(1) + '万円';
+            document.getElementById('pl-personal-allowance').textContent = (totalPersonalAllowance / 10000).toFixed(1) + '万円';
+            document.getElementById('pl-parttime').textContent = (totalParttime / 10000).toFixed(1) + '万円';
+            document.getElementById('pl-pm').textContent = (totalPM / 10000).toFixed(1) + '万円';
+            document.getElementById('pl-welfare').textContent = (pl.welfare / 10000).toFixed(1) + '万円';
+            
+            // 全社固定費(2店舗分)
+            document.getElementById('pl-logistics').textContent = ((fixedCostPerStore.logistics * storeCount) / 10000).toFixed(1) + '万円';
+            document.getElementById('pl-outsource').textContent = ((fixedCostPerStore.outsource * storeCount) / 10000).toFixed(1) + '万円';
+            document.getElementById('pl-shipping').textContent = ((fixedCostPerStore.shipping * storeCount) / 10000).toFixed(1) + '万円';
+            document.getElementById('pl-advertising').textContent = ((fixedCostPerStore.advertising * storeCount) / 10000).toFixed(1) + '万円';
+            document.getElementById('pl-promotion').textContent = ((fixedCostPerStore.promotion * storeCount) / 10000).toFixed(1) + '万円';
+            document.getElementById('pl-lease').textContent = ((fixedCostPerStore.lease * storeCount) / 10000).toFixed(1) + '万円';
+            document.getElementById('pl-insurance').textContent = ((fixedCostPerStore.insurance * storeCount) / 10000).toFixed(1) + '万円';
+            document.getElementById('pl-consulting').textContent = ((fixedCostPerStore.consulting * storeCount) / 10000).toFixed(1) + '万円';
+            document.getElementById('pl-depreciation').textContent = ((fixedCostPerStore.depreciation * storeCount) / 10000).toFixed(1) + '万円';
+            
+            // 店舗固定費
+            document.getElementById('pl-hygiene').textContent = (totalHygiene / 10000).toFixed(1) + '万円';
+            document.getElementById('pl-rent').textContent = (totalRent / 10000).toFixed(1) + '万円';
+            document.getElementById('pl-travel').textContent = (totalTravel / 10000).toFixed(1) + '万円';
+            document.getElementById('pl-communication').textContent = (totalCommunication / 10000).toFixed(1) + '万円';
+            document.getElementById('pl-supplies').textContent = (totalSupplies / 10000).toFixed(1) + '万円';
+            document.getElementById('pl-office').textContent = (totalOffice / 10000).toFixed(1) + '万円';
+            document.getElementById('pl-utility').textContent = (totalUtility / 10000).toFixed(1) + '万円';
+            document.getElementById('pl-management').textContent = (totalManagement / 10000).toFixed(1) + '万円';
+            document.getElementById('pl-profit').textContent = (pl.profit / 10000).toFixed(1) + '万円';
+            
+            // 営業利益の色変更
+            const profitElement = document.getElementById('pl-profit');
+            if (pl.profit >= 0) {
+                profitElement.className = 'pl-amount pl-positive';
+            } else {
+                profitElement.className = 'pl-amount pl-negative';
+            }
+            
+            // KPI更新
+            document.getElementById('kpi1').textContent = (inStoreSales/10000).toFixed(1) + '万円';
+            document.getElementById('kpi3').textContent = totalAchievementRate.toFixed(1) + '%';
+            
+            // スタッフカード更新(役職順)
+            const container = document.getElementById('storesContainer');
+            container.innerHTML = allStaffSalaries.map(storeData => {
+                const store = stores.find(s => s.name === storeData.storeName);
+                const sortedSalaries = sortStaffByPosition(storeData.staffSalaries);
+                
+                return `
+                    <div class="store-block">
+                        <div class="store-block-header">${storeData.storeName}</div>
+                        <div class="store-summary">
+                            <div class="summary-item">
+                                <span class="summary-label">責任額:</span>
+                                <span class="summary-value emphasis">${(store.responsibility/10000).toFixed(0)}<span class="summary-unit">万</span></span>
+                            </div>
+                            <div class="summary-item">
+                                <span class="summary-label">定期購入:</span>
+                                <span class="summary-value emphasis">${(store.periodicSales/10000).toFixed(1)}<span class="summary-unit">万</span></span>
+                            </div>
+                            <div class="summary-item">
+                                <span class="summary-label">想定売上:</span>
+                                <span class="summary-value" style="color: #f97316;">${(storeData.storeTargetSales/10000).toFixed(1)}<span class="summary-unit">万</span></span>
+                            </div>
+                            <div class="summary-item">
+                                <span class="summary-label">店舗達成率:</span>
+                                <span class="summary-value" style="color: ${storeData.storeAchievementRate >= 100 ? '#059669' : '#dc2626'};">${storeData.storeAchievementRate.toFixed(1)}%</span>
+                            </div>
+                            <div class="summary-item">
+                                <span class="summary-label">人数:</span>
+                                <span class="summary-value">${store.staff.length}名</span>
+                            </div>
+                            <div class="summary-item">
+                                <span class="summary-label">合算達成率:</span>
+                                <span class="summary-value" style="color: ${totalAchievementRate >= 100 ? '#059669' : '#dc2626'};">${totalAchievementRate.toFixed(1)}%</span>
+                            </div>
+                        </div>
+                        <div class="staff-cards">
+                            ${sortedSalaries.map(s => `
+                                <div class="staff-card">
+                                    <div class="staff-header">
+                                        <div>
+                                            <div class="staff-name">${s.name}</div>
+                                            <div class="staff-position">${s.position}</div>
+                                        </div>
+                                        <div class="staff-sales">想定: ${(s.newSales/10000).toFixed(1)}万円</div>
+                                    </div>
+                                    <div class="salary-grid">
+                                        <div class="salary-item"><span class="salary-label">現在実績</span><span class="salary-value">${(s.currentSales/10000).toFixed(1)}万</span></div>
+                                        <div class="salary-item"><span class="salary-label">基本給</span><span class="salary-value">${(s.baseSalary/10000).toFixed(1)}万</span></div>
+                                        <div class="salary-item"><span class="salary-label">店舗手当</span><span class="salary-value">${(s.storeSalesAllowance/10000).toFixed(1)}万</span></div>
+                                        <div class="salary-item" style="background: #fecaca;"><span class="salary-label" style="color: #dc2626;">加算額</span><span class="salary-value" style="color: #dc2626; font-size: 11px; font-weight: 700;">${(s.increaseSales/10000).toFixed(1)}万</span></div>
+                                        <div class="salary-item"><span class="salary-label">役職給</span><span class="salary-value">込</span></div>
+                                        <div class="salary-item"><span class="salary-label">個人手当</span><span class="salary-value">${(s.personalAllowance/10000).toFixed(1)}万</span></div>
+                                        <div class="salary-item" style="background: #ccfbf1;"><span class="salary-label" style="color: #0f766e;">個人目標</span><span class="salary-value" style="color: #0d9488; font-size: 11px; font-weight: 700;">${(s.newSales/10000).toFixed(1)}万</span></div>
+                                        <div class="salary-item"><span class="salary-label">達成手当</span><span class="salary-value">${(s.achievementAllowance/10000).toFixed(1)}万</span></div>
+                                        <div class="salary-item"><span class="salary-label">その他</span><span class="salary-value">0万</span></div>
+                                        <div class="salary-item salary-total"><span class="salary-label">支給合計</span><span class="salary-value">${(s.total/10000).toFixed(1)}万</span></div>
+                                    </div>
+                                </div>
+                            `).join('')}
+                        </div>
+                    </div>
+                `;
+            }).join('');
+        }
+        
+        // Enterキーで計算実行
+        document.getElementById('targetSales').addEventListener('keypress', function(e) {
+            if (e.key === 'Enter' && selectedStores.length === 2) {
+                execute();
+            }
+        });
+        
+        // 入力時にボタン有効化
+        document.getElementById('targetSales').addEventListener('input', function() {
+            if (selectedStores.length === 2 && this.value) {
+                document.getElementById('executeBtn').disabled = false;
+            }
+        });
+        
+        // チェックボックスのイベントリスナー
+        document.querySelectorAll('input[type="checkbox"]').forEach(cb => {
+            cb.addEventListener('change', updateSelection);
+        });
+    </script>
+</body>
+</html>
